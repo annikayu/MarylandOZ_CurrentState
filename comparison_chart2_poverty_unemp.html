@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta http-equiv="X-Frame-Options" content="ALLOWALL"/>
+  <title>MD OZ — Poverty &amp; Unemployment</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f6f1; color: #1a1a1a; }
+  h1 { font-size: 1.1rem; font-weight: 700; color: #7b4f12; }
+  h2 { font-size: 0.95rem; font-weight: 600; color: #444; margin-bottom: 6px; }
+  p.sub { font-size: 0.75rem; color: #666; margin-top: 2px; }
+  .header { background: #fff; border-bottom: 2px solid #d4c9b0; padding: 12px 20px; }
+  .body { padding: 16px 20px; }
+  .legend { display: flex; gap: 20px; margin-bottom: 14px; font-size: 0.78rem; }
+  .legend span { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 5px; vertical-align: middle; }
+  .chart-wrap { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .note { font-size: 0.7rem; color: #888; margin-top: 8px; }
+  canvas { max-width: 100%; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>Poverty &amp; Unemployment: Designated OZ vs. Eligible-Not-Selected</h1>
+    <p class="sub">ACS 5-Year 2017 (baseline) vs 2023 (current) · Median of tract-level values</p>
+  </div>
+  <div class="body">
+    <div class="legend">
+      <div><span style="background:#7b4f12"></span>Designated OZ (149)</div>
+      <div><span style="background:#0369a1"></span>Eligible Not Selected (389)</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="chart-wrap">
+        <h2>Poverty Rate — 2017 vs 2023</h2>
+        <p class="sub">Median change: OZ <strong>-0.5 pp</strong> · Eligible <strong>-0.6 pp</strong></p>
+        <canvas id="povBar" height="200"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <h2>Unemployment Rate — 2017 vs 2023</h2>
+        <p class="sub">Median change: OZ <strong>-2.6 pp</strong> · Eligible <strong>-2.2 pp</strong></p>
+        <canvas id="unempBar" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="chart-wrap">
+        <h2>Poverty Change Distribution (pp, 2017→2023)</h2>
+        <p class="sub">How many tracts saw each magnitude of change</p>
+        <canvas id="povDist" height="200"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <h2>Unemployment Change Distribution (pp, 2017→2023)</h2>
+        <p class="sub">How many tracts saw each magnitude of change</p>
+        <canvas id="unempDist" height="200"></canvas>
+      </div>
+    </div>
+    <p class="note">Source: ACS 5-Year Estimates; HUD Opportunity Zones layer. Values are percentage points (pp). Negative = improvement.</p>
+  </div>
+  <script>
+    const barOpts = {
+      responsive: true,
+      plugins: { legend: { position:'top' } },
+      scales: { y: { title:{display:true,text:'Rate (%)'}, grid:{color:'#eee'} }, x:{grid:{display:false}} }
+    };
+    const distOpts = {
+      responsive: true,
+      plugins: { legend:{position:'top'} },
+      scales: { y:{title:{display:true,text:'# Tracts'},grid:{color:'#eee'}}, x:{ticks:{maxTicksLimit:6},grid:{display:false}} }
+    };
+
+    new Chart(document.getElementById('povBar'), {
+      type:'bar', data:{
+        labels:['2017','2023'],
+        datasets:[
+          {label:'Designated OZ',  data:[18.95, 16.58],  backgroundColor:'#7b4f12',  borderRadius:4},
+          {label:'Eligible Not Selected',data:[14.44, 13.89],backgroundColor:'#0369a1',borderRadius:4}
+        ]
+      }, options:barOpts
+    });
+    new Chart(document.getElementById('unempBar'), {
+      type:'bar', data:{
+        labels:['2017','2023'],
+        datasets:[
+          {label:'Designated OZ',  data:[8.51, 6.11],  backgroundColor:'#7b4f12',  borderRadius:4},
+          {label:'Eligible Not Selected',data:[8.25, 5.96],backgroundColor:'#0369a1',borderRadius:4}
+        ]
+      }, options:barOpts
+    });
+    new Chart(document.getElementById('povDist'), {
+      type:'bar', data:{
+        labels:["-25.0\u2013-22.5", "-22.5\u2013-20.0", "-20.0\u2013-17.5", "-17.5\u2013-15.0", "-15.0\u2013-12.5", "-12.5\u2013-10.0", "-10.0\u2013-7.5", "-7.5\u2013-5.0", "-5.0\u2013-2.5", "-2.5\u20130.0", "0.0\u20132.5", "2.5\u20135.0", "5.0\u20137.5", "7.5\u201310.0", "10.0\u201312.5", "12.5\u201315.0"],
+        datasets:[
+          {label:'Designated OZ',  data:[2, 2, 2, 3, 6, 10, 8, 9, 10, 22, 24, 11, 9, 7, 6, 8],  backgroundColor:'rgba(123,79,18,0.7)',  borderRadius:2},
+          {label:'Eligible Not Selected',data:[5, 2, 7, 8, 9, 13, 18, 34, 42, 53, 55, 35, 30, 17, 11, 21],backgroundColor:'rgba(3,105,161,0.7)',borderRadius:2}
+        ]
+      }, options:{...distOpts, plugins:{...distOpts.plugins, tooltip:{callbacks:{title:ctx=>ctx[0].label+' pp'}}}}
+    });
+    new Chart(document.getElementById('unempDist'), {
+      type:'bar', data:{
+        labels:["-20.0\u2013-18.0", "-18.0\u2013-16.0", "-16.0\u2013-14.0", "-14.0\u2013-12.0", "-12.0\u2013-10.0", "-10.0\u2013-8.0", "-8.0\u2013-6.0", "-6.0\u2013-4.0", "-4.0\u2013-2.0", "-2.0\u20130.0", "0.0\u20132.0", "2.0\u20134.0", "4.0\u20136.0", "6.0\u20138.0", "8.0\u201310.0"],
+        datasets:[
+          {label:'Designated OZ',  data:[1, 1, 4, 4, 2, 4, 12, 22, 21, 23, 28, 6, 5, 1, 5],  backgroundColor:'rgba(123,79,18,0.7)',  borderRadius:2},
+          {label:'Eligible Not Selected',data:[3, 2, 3, 4, 9, 30, 30, 46, 58, 56, 48, 28, 22, 6, 8],backgroundColor:'rgba(3,105,161,0.7)',borderRadius:2}
+        ]
+      }, options:{...distOpts, plugins:{...distOpts.plugins, tooltip:{callbacks:{title:ctx=>ctx[0].label+' pp'}}}}
+    });
+  </script>
+</body>
+</html>
